@@ -745,7 +745,7 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Formato</th><th>Gramaje</th><th>Precio/g</th><th>Margen %</th><th>Margen $</th><th>Ahorro vs base</th></tr>
+          <tr><th>Formato</th><th>Gramaje</th><th>Precio venta</th><th>Costo total</th><th>Precio/g</th><th>Margen %</th><th>Margen $</th><th>Ahorro vs base</th></tr>
         </thead>
         <tbody id="pyr-tbody"></tbody>
       </table>
@@ -968,6 +968,8 @@ function buildPyramid(prices) {
     html += `<tr>
       <td style="font-weight:500">${f.name}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);font-weight:500">${fmtClp(f.precioVenta)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)">${fmtClp(f.costoTotal)}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.ppg < 10 ? '$'+f.ppg.toFixed(1) : '$'+Math.round(f.ppg)}/g</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor};font-weight:500">${margenPct}%</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor}">${fmtClp(margenPeso)}</td>
