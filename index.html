@@ -884,7 +884,7 @@ function recalc() {
       <td class="p-name">${f.name}</td>
       <td class="p-cost">${fmtClp(costoTotal)}</td>
       <td class="p-price">${fmtClp(precioVenta)}</td>
-      <td class="p-pxg">${fmtClp(ppg)}/g</td>
+      <td class="p-pxg" title="Precio exacto: $${ppg.toFixed(2)}/g">${ppg < 10 ? '$'+ppg.toFixed(1) : '$'+Math.round(ppg)}/g</td>
       <td><span class="${stateClass}" style="font-family:'DM Mono',monospace;font-size:12px">${fmtPct(margen)}</span></td>
       <td><span class="badge ${stateB}">${stateLabel}</span></td>
     </tr>`;
@@ -936,7 +936,7 @@ function buildPyramid(prices) {
     const row = document.createElement('div');
     row.className = 'pyr-row';
     row.innerHTML = `
-      <div class="pyr-label-left" style="color:${colors[ri]}">${fmtClp(f.ppg)}/g</div>
+      <div class="pyr-label-left" style="color:${colors[ri]}">${f.ppg < 10 ? '$'+f.ppg.toFixed(1) : '$'+Math.round(f.ppg)}/g</div>
       <div class="pyr-bar-wrap">
         <div class="pyr-bar" style="width:${width}%;background:${colors[ri]}18;border:1px solid ${colors[ri]}40;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:8px 14px;height:auto;min-height:52px;">
           <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
@@ -966,7 +966,7 @@ function buildPyramid(prices) {
     html += `<tr>
       <td style="font-weight:500">${f.name}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${fmtClp(f.ppg)}/g</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.ppg < 10 ? '$'+f.ppg.toFixed(1) : '$'+Math.round(f.ppg)}/g</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor};font-weight:500">${margenPct}%</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor}">${fmtClp(margenPeso)}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)">${ahorro > 0 ? '−'+ahorro+'% vs base' : '—'}</td>
