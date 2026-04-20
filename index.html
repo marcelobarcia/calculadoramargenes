@@ -703,7 +703,7 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Formato</th><th>Precio/g relativo</th><th>Índice vs 100g base</th><th>Ahorro acumulado</th></tr>
+          <tr><th>Formato</th><th>Gramaje</th><th>Precio/g</th><th>Margen %</th><th>Margen $</th><th>Ahorro vs base</th></tr>
         </thead>
         <tbody id="pyr-tbody"></tbody>
       </table>
@@ -840,14 +840,23 @@ function buildPyramid(prices) {
   [...prices].reverse().forEach((f, i) => {
     const width = 30 + ((prices.length - 1 - (prices.length - 1 - i)) / (prices.length - 1)) * 68;
     const ri = prices.length - 1 - i;
+    const margenPeso = f.precioVenta - f.costoTotal;
+    const margenPct  = Math.round(f.margen * 100);
     const row = document.createElement('div');
     row.className = 'pyr-row';
     row.innerHTML = `
       <div class="pyr-label-left" style="color:${colors[ri]}">${fmtClp(f.ppg)}/g</div>
       <div class="pyr-bar-wrap">
-        <div class="pyr-bar" style="width:${width}%;background:${colors[ri]}18;border:1px solid ${colors[ri]}40">
-          <span class="pyr-name" style="color:${colors[ri]}">${f.name}</span>
-          <span class="pyr-price" style="color:${colors[ri]}">${fmtClp(f.precioVenta)}</span>
+        <div class="pyr-bar" style="width:${width}%;background:${colors[ri]}18;border:1px solid ${colors[ri]}40;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:8px 14px;height:auto;min-height:52px;">
+          <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+            <span class="pyr-name" style="color:${colors[ri]}">${f.name}</span>
+            <span class="pyr-price" style="color:${colors[ri]}">${fmtClp(f.precioVenta)}</span>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center">
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:${colors[ri]}99">${f.g >= 1000 ? (f.g/1000)+'kg' : f.g+'g'}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--teal)">margen ${margenPct}%</span>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--teal)">${fmtClp(margenPeso)}/und.</span>
+          </div>
         </div>
       </div>
       <div class="pyr-label-right" style="color:${colors[ri]}">${Math.round(f.dto*100) > 0 ? '−'+Math.round(f.dto*100)+'%' : 'base'}</div>
@@ -860,11 +869,16 @@ function buildPyramid(prices) {
   prices.forEach((f, i) => {
     const relativo = (f.ppg / prices[0].ppg * 100).toFixed(0);
     const ahorro = (100 - relativo).toFixed(0);
+    const margenPeso = f.precioVenta - f.costoTotal;
+    const margenPct  = Math.round(f.margen * 100);
+    const mColor = margenPct >= 30 ? 'var(--teal)' : margenPct >= 15 ? 'var(--amber)' : 'var(--red)';
     html += `<tr>
       <td style="font-weight:500">${f.name}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${fmtClp(f.ppg)}/g</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${relativo}%</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">${ahorro > 0 ? '−'+ahorro+'%' : '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor};font-weight:500">${margenPct}%</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor}">${fmtClp(margenPeso)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)">${ahorro > 0 ? '−'+ahorro+'% vs base' : '—'}</td>
     </tr>`;
   });
   document.getElementById('pyr-tbody').innerHTML = html;
