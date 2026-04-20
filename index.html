@@ -419,6 +419,44 @@
   .pyr-label-left { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); width: 60px; text-align: right; }
   .pyr-label-right { font-family: 'DM Mono', monospace; font-size: 11px; width: 55px; }
 
+  /* Competitor inputs */
+  .comp-input-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    transition: border-color 0.2s;
+  }
+  .comp-input-card:focus-within { border-color: var(--blue); }
+  .comp-gram-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+  .comp-format-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
+  .comp-price-row { display: flex; align-items: baseline; gap: 5px; }
+  .comp-price-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--blue);
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    width: 100%;
+    -moz-appearance: textfield;
+  }
+  .comp-price-input::-webkit-outer-spin-button,
+  .comp-price-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .comp-price-input::placeholder { color: var(--text3); }
+  .comp-unit { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); }
+  .comp-my-price { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+  /* Comparison bars */
+  .cbar-section { margin-bottom: 20px; }
+  .cbar-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
+  .cbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .cbar-lbl { font-size: 11px; color: var(--text3); width: 60px; text-align: right; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cbar-track { flex: 1; height: 22px; background: var(--bg3); border-radius: 4px; overflow: hidden; position: relative; }
+  .cbar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-family: 'DM Mono', monospace; font-size: 10px; transition: width 0.5s ease; white-space: nowrap; overflow: hidden; }
+  .cbar-val { font-family: 'DM Mono', monospace; font-size: 11px; min-width: 64px; }
+
   /* Footer */
   .footer {
     margin-top: 48px;
@@ -462,6 +500,9 @@
     </button>
     <button class="tab-btn" onclick="showTab('piramide')" role="tab">
       <span class="tab-dot"></span>Pirámide de precios
+    </button>
+    <button class="tab-btn" onclick="showTab('competencia')" role="tab">
+      <span class="tab-dot"></span>vs Competencia
     </button>
   </div>
 
@@ -710,6 +751,54 @@
     </div>
   </div>
 
+  <!-- TAB 5: Competencia -->
+  <div id="tab-competencia" class="tab-panel">
+    <div class="section-head">
+      <h2>Comparación con competencia</h2>
+      <span class="sh-count">ingresa precios del competidor</span>
+    </div>
+    <div class="tip-box" style="margin-bottom:24px">
+      <span class="tip-icon">🔍</span>
+      <div>Ingresa el <strong>nombre del competidor</strong> y sus precios de venta por formato. Los campos vacíos se ignoran. Tus precios se calculan automáticamente desde la Calculadora.</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <div class="input-card" style="flex:1;padding:12px 16px">
+        <div class="input-label">Nombre del competidor</div>
+        <input type="text" id="comp-name" placeholder="ej: NutriSecos, MercadoLibre..." oninput="recalcComp()"
+          style="background:transparent;border:none;outline:none;color:var(--text);font-family:'Geist',sans-serif;font-size:16px;font-weight:500;width:100%">
+      </div>
+      <div style="font-size:12px;color:var(--text3);text-align:center;padding:0 8px">
+        <div style="font-family:'DM Mono',monospace">tus precios</div>
+        <div style="font-size:18px;margin:4px 0">↔</div>
+        <div style="font-family:'DM Mono',monospace;color:var(--blue)">competidor</div>
+      </div>
+    </div>
+
+    <div id="comp-inputs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:28px"></div>
+
+    <div class="section-head" style="margin-top:8px">
+      <h2>Análisis comparativo</h2>
+    </div>
+    <div id="comp-summary-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Formato</th>
+            <th>Tu precio</th>
+            <th>Competidor</th>
+            <th>Diferencia $</th>
+            <th>Diferencia %</th>
+            <th>Posición</th>
+          </tr>
+        </thead>
+        <tbody id="comp-tbody"></tbody>
+      </table>
+    </div>
+    <div id="comp-bars-wrap" style="margin-top:24px"></div>
+  </div>
+
   <footer class="footer">
     <p>Datos basados en mercado de frutos secos Chile · Precios en CLP</p>
     <span class="footer-logo">v1.0</span>
@@ -825,6 +914,8 @@ function recalc() {
   `;
 
   buildPyramid(prices);
+  lastPrices = prices;
+  if (document.getElementById('tab-competencia').classList.contains('active')) recalcComp();
 }
 
 // ── Pirámide ──
@@ -885,12 +976,139 @@ function buildPyramid(prices) {
 }
 
 // ── Tab switching ──
+const TAB_NAMES = ['gramajes','descuentos','calculadora','piramide','competencia'];
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('.tab-btn')[['gramajes','descuentos','calculadora','piramide'].indexOf(name)].classList.add('active');
+  document.querySelectorAll('.tab-btn')[TAB_NAMES.indexOf(name)].classList.add('active');
   if (name === 'calculadora' || name === 'piramide') recalc();
+  if (name === 'competencia') { buildCompInputs(); recalcComp(); }
+}
+
+// ── Competitor logic ──
+let lastPrices = [];
+
+function buildCompInputs() {
+  const grid = document.getElementById('comp-inputs-grid');
+  if (grid.children.length > 0) return; // already built
+  FORMATS.forEach(f => {
+    const gLabel = f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g';
+    const div = document.createElement('div');
+    div.className = 'comp-input-card';
+    div.innerHTML = `
+      <div class="comp-gram-label">${gLabel}</div>
+      <div class="comp-format-label">${f.name}</div>
+      <div class="comp-price-row">
+        <span class="comp-unit">$</span>
+        <input class="comp-price-input" type="number" min="0" step="100"
+          id="ci-${f.g}" placeholder="—" oninput="recalcComp()">
+      </div>
+      <div class="comp-my-price" id="ci-myprice-${f.g}">Tu precio: —</div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function recalcComp() {
+  if (!lastPrices.length) return;
+  const compName = document.getElementById('comp-name').value.trim() || 'Competidor';
+  const colors   = ['#60a8f0','#8888f0','#c8f060','#a8d040','#f5a623','#f08030','#f05050','#d03030'];
+
+  // Update "tu precio" hints
+  lastPrices.forEach(f => {
+    const el = document.getElementById('ci-myprice-' + f.g);
+    if (el) el.textContent = 'Tu precio: ' + fmtClp(f.precioVenta);
+  });
+
+  // Collect competitor prices
+  const rows = lastPrices.map((f, i) => {
+    const inp = document.getElementById('ci-' + f.g);
+    const compPrice = inp && inp.value ? parseFloat(inp.value) : null;
+    return { ...f, compPrice, color: colors[i] };
+  }).filter(r => r.compPrice !== null);
+
+  if (!rows.length) {
+    document.getElementById('comp-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;font-size:13px">Ingresa al menos un precio del competidor para ver el análisis</td></tr>`;
+    document.getElementById('comp-summary-cards').innerHTML = '';
+    document.getElementById('comp-bars-wrap').innerHTML = '';
+    return;
+  }
+
+  // Table
+  let tbody = '';
+  rows.forEach(r => {
+    const diff    = r.precioVenta - r.compPrice;
+    const diffPct = (diff / r.compPrice * 100);
+    const cheaper  = diff < 0;
+    const equal    = Math.abs(diffPct) < 2;
+    let posLabel, posBadge, diffColor;
+    if (equal)         { posLabel = '≈ Similar';      posBadge = 'badge-gray';  diffColor = 'var(--text2)'; }
+    else if (cheaper)  { posLabel = '✓ Más barato';   posBadge = 'badge-teal';  diffColor = 'var(--teal)'; }
+    else               { posLabel = '↑ Más caro';     posBadge = 'badge-amber'; diffColor = 'var(--amber)'; }
+
+    tbody += `<tr>
+      <td style="font-weight:500">${r.name}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)">${fmtClp(r.precioVenta)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:var(--blue)">${fmtClp(r.compPrice)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:${diffColor}">${diff < 0 ? '' : '+'}${fmtClp(diff)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:${diffColor}">${diffPct > 0 ? '+' : ''}${diffPct.toFixed(1)}%</td>
+      <td><span class="badge ${posBadge}">${posLabel}</span></td>
+    </tr>`;
+  });
+  document.getElementById('comp-tbody').innerHTML = tbody;
+
+  // Summary cards
+  const cheaper  = rows.filter(r => r.precioVenta < r.compPrice * 0.98).length;
+  const pricier  = rows.filter(r => r.precioVenta > r.compPrice * 1.02).length;
+  const similar  = rows.length - cheaper - pricier;
+  const avgDiff  = rows.reduce((s, r) => s + (r.precioVenta - r.compPrice) / r.compPrice * 100, 0) / rows.length;
+  const diffSign = avgDiff <= 0 ? 'var(--teal)' : 'var(--amber)';
+  document.getElementById('comp-summary-cards').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">Más baratos que ${compName}</div>
+      <div class="metric-value" style="color:var(--teal)">${cheaper} formato${cheaper !== 1 ? 's' : ''}</div>
+      <div class="metric-sub">de ${rows.length} comparados</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Más caros que ${compName}</div>
+      <div class="metric-value" style="color:var(--amber)">${pricier} formato${pricier !== 1 ? 's' : ''}</div>
+      <div class="metric-sub">de ${rows.length} comparados</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Diferencia promedio</div>
+      <div class="metric-value" style="color:${diffSign}">${avgDiff > 0 ? '+' : ''}${avgDiff.toFixed(1)}%</div>
+      <div class="metric-sub">${avgDiff <= 0 ? 'Sos más competitivo' : 'Estás por encima'}</div>
+    </div>
+  `;
+
+  // Bar chart comparison
+  const maxPrice = Math.max(...rows.map(r => Math.max(r.precioVenta, r.compPrice)));
+  let barsHtml = `<div class="cbar-section">
+    <div style="display:flex;gap:16px;margin-bottom:14px;font-size:12px">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#c8f060;display:inline-block"></span>Tus precios</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#60a8f0;display:inline-block"></span>${compName}</span>
+    </div>`;
+
+  rows.forEach(r => {
+    const wMy   = Math.round((r.precioVenta / maxPrice) * 100);
+    const wComp = Math.round((r.compPrice   / maxPrice) * 100);
+    const gLabel = r.g >= 1000 ? (r.g/1000)+'kg' : r.g+'g';
+    barsHtml += `
+      <div class="cbar-row">
+        <div class="cbar-lbl">${gLabel}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+          <div class="cbar-track">
+            <div class="cbar-fill" style="width:${wMy}%;background:#c8f06030;border:1px solid #c8f06060;color:var(--accent)">${fmtClp(r.precioVenta)}</div>
+          </div>
+          <div class="cbar-track">
+            <div class="cbar-fill" style="width:${wComp}%;background:#60a8f025;border:1px solid #60a8f050;color:var(--blue)">${fmtClp(r.compPrice)}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  barsHtml += '</div>';
+  document.getElementById('comp-bars-wrap').innerHTML = barsHtml;
 }
 
 // ── Init ──
