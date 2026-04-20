@@ -714,6 +714,7 @@
         <thead>
           <tr>
             <th>Formato</th>
+            <th>Gramaje</th>
             <th>Costo total</th>
             <th>Precio venta</th>
             <th>$/g</th>
@@ -882,6 +883,7 @@ function recalc() {
 
     tbody += `<tr>
       <td class="p-name">${f.name}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g'}</td>
       <td class="p-cost">${fmtClp(costoTotal)}</td>
       <td class="p-price">${fmtClp(precioVenta)}</td>
       <td class="p-pxg" title="Precio exacto: $${ppg.toFixed(2)}/g">${ppg < 10 ? '$'+ppg.toFixed(1) : '$'+Math.round(ppg)}/g</td>
