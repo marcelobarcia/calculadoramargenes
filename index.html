@@ -687,7 +687,7 @@
           <input class="calc-input" type="number" id="c-costkg" value="8000" min="100" step="100" oninput="recalc()">
           <span class="input-unit">CLP/kg</span>
         </div>
-        <div class="input-hint">Precio que pagás al proveedor a granel</div>
+        <div class="input-hint">Sin IVA · precio neto del proveedor</div>
       </div>
       <div class="input-card">
         <div class="input-label">Embalaje + etiqueta</div>
@@ -695,7 +695,7 @@
           <input class="calc-input" type="number" id="c-emb" value="250" min="0" step="50" oninput="recalc()">
           <span class="input-unit">CLP/und.</span>
         </div>
-        <div class="input-hint">Bolsa, etiqueta, sello por unidad</div>
+        <div class="input-hint">Sin IVA · bolsa, etiqueta, sello</div>
       </div>
       <div class="input-card" style="grid-column: 1 / -1;">
         <div class="input-label">Margen mínimo deseado: <span id="c-margen-val" style="color:var(--accent)">30%</span></div>
@@ -707,6 +707,10 @@
         </div>
       </div>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;padding:10px 14px;background:rgba(96,168,240,0.07);border:1px solid rgba(96,168,240,0.18);border-radius:var(--radius);font-size:12px;color:var(--blue)">
+      <span style="font-size:14px">ⓘ</span>
+      <span>Los costos se ingresan <strong>sin IVA</strong>. El precio de venta al público se muestra <strong>con IVA (19%)</strong> incluido. El margen se calcula sobre el precio neto.</span>
+    </div>
 
     <div class="metrics-row" id="c-metrics"></div>
 
@@ -716,8 +720,9 @@
           <tr>
             <th>Formato</th>
             <th>Gramaje</th>
-            <th>Costo total</th>
-            <th>Precio venta</th>
+            <th>Costo neto</th>
+            <th>Precio neto</th>
+            <th>Precio c/IVA</th>
             <th>$/g</th>
             <th>Margen</th>
             <th>Estado</th>
@@ -861,31 +866,35 @@ function recalc() {
   const minMgn  = parseFloat(document.getElementById('c-margen').value)  / 100 || 0.30;
 
   const costPg  = costKg / 1000;
-  // precio base (100g) calculado con el margen mínimo deseado
-  const basePrice100 = (costPg * 100 + emb) / (1 - minMgn);
+  const IVA = 1.19;
+  // precio base neto (100g) calculado con el margen mínimo deseado, luego se aplica IVA al público
+  const basePrice100neto = (costPg * 100 + emb) / (1 - minMgn);
+  const basePrice100     = basePrice100neto * IVA;
 
   let tbody = '';
   let prices = [];
 
   FORMATS.forEach(f => {
-    const costoProducto = costPg * f.g;
-    const costoTotal    = costoProducto + emb;
-    const precioPleno   = basePrice100 * (f.g / 100);
-    const precioVenta   = precioPleno * (1 - f.dto);
-    const margen        = (precioVenta - costoTotal) / precioVenta;
-    const ppg           = precioVenta / f.g;
-    prices.push({ ...f, costoTotal, precioVenta, margen, ppg });
+    const costoProducto  = costPg * f.g;
+    const costoTotal     = costoProducto + emb;            // costo neto sin IVA
+    const precioNetoBase = basePrice100neto * (f.g / 100);
+    const precioNeto     = precioNetoBase * (1 - f.dto);   // precio neto sin IVA
+    const precioVenta    = precioNeto * IVA;               // precio público con IVA
+    const margen         = (precioNeto - costoTotal) / precioNeto; // margen sobre neto
+    const ppg            = precioVenta / f.g;              // $/g con IVA (precio de etiqueta)
+    prices.push({ ...f, costoTotal, precioNeto, precioVenta, margen, ppg });
 
-    const ok = margen >= minMgn;
+    const ok    = margen >= minMgn;
     const okLow = margen >= minMgn * 0.7;
-    let stateClass = ok ? 'p-ok' : okLow ? 'p-warn' : 'p-bad';
-    let stateLabel = ok ? '✓ OK' : okLow ? '⚠ Revisar' : '✗ Pérdida';
+    let stateClass = ok ? 'p-ok'    : okLow ? 'p-warn'    : 'p-bad';
+    let stateLabel = ok ? '✓ OK'   : okLow ? '⚠ Revisar' : '✗ Pérdida';
     let stateB     = ok ? 'badge-teal' : okLow ? 'badge-amber' : 'badge-red';
 
     tbody += `<tr>
       <td class="p-name">${f.name}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g'}</td>
       <td class="p-cost">${fmtClp(costoTotal)}</td>
+      <td class="p-cost" style="color:var(--text2)">${fmtClp(precioNeto)}</td>
       <td class="p-price">${fmtClp(precioVenta)}</td>
       <td class="p-pxg" title="Precio exacto: $${ppg.toFixed(2)}/g">${ppg < 10 ? '$'+ppg.toFixed(1) : '$'+Math.round(ppg)}/g</td>
       <td><span class="${stateClass}" style="font-family:'DM Mono',monospace;font-size:12px">${fmtPct(margen)}</span></td>
@@ -900,17 +909,17 @@ function recalc() {
   const ahorroKg = ((p100.ppg - p1kg.ppg) / p100.ppg * 100).toFixed(0);
   document.getElementById('c-metrics').innerHTML = `
     <div class="metric-card">
-      <div class="metric-label">Precio 100 g</div>
+      <div class="metric-label">Precio 100 g <span style="color:var(--blue);font-size:10px">c/IVA</span></div>
       <div class="metric-value" style="color:var(--accent)">${fmtClp(p100.precioVenta)}</div>
-      <div class="metric-sub">Precio de referencia</div>
+      <div class="metric-sub">Neto: ${fmtClp(p100.precioNeto)}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Precio 1 kg</div>
+      <div class="metric-label">Precio 1 kg <span style="color:var(--blue);font-size:10px">c/IVA</span></div>
       <div class="metric-value" style="color:var(--teal)">${fmtClp(p1kg.precioVenta)}</div>
       <div class="metric-sub">Ahorra ${ahorroKg}% por gramo</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Precio 5 kg</div>
+      <div class="metric-label">Precio 5 kg <span style="color:var(--blue);font-size:10px">c/IVA</span></div>
       <div class="metric-value" style="color:var(--amber)">${fmtClp(p5kg.precioVenta)}</div>
       <div class="metric-sub">Canal distribución</div>
     </div>
@@ -934,7 +943,7 @@ function buildPyramid(prices) {
   [...prices].reverse().forEach((f, i) => {
     const width = 30 + ((prices.length - 1 - (prices.length - 1 - i)) / (prices.length - 1)) * 68;
     const ri = prices.length - 1 - i;
-    const margenPeso = f.precioVenta - f.costoTotal;
+    const margenPeso = f.precioNeto - f.costoTotal;
     const margenPct  = Math.round(f.margen * 100);
     const row = document.createElement('div');
     row.className = 'pyr-row';
@@ -944,7 +953,7 @@ function buildPyramid(prices) {
         <div class="pyr-bar" style="width:${width}%;background:${colors[ri]}18;border:1px solid ${colors[ri]}40;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:8px 14px;height:auto;min-height:52px;">
           <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
             <span class="pyr-name" style="color:${colors[ri]}">${f.name}</span>
-            <span class="pyr-price" style="color:${colors[ri]}">${fmtClp(f.precioVenta)}</span>
+            <span class="pyr-price" style="color:${colors[ri]}">${fmtClp(f.precioVenta)} <span style="font-size:9px;opacity:0.6">c/IVA</span></span>
           </div>
           <div style="display:flex;gap:14px;align-items:center">
             <span style="font-family:'DM Mono',monospace;font-size:10px;color:${colors[ri]}99">${f.g >= 1000 ? (f.g/1000)+'kg' : f.g+'g'}</span>
@@ -963,13 +972,13 @@ function buildPyramid(prices) {
   prices.forEach((f, i) => {
     const relativo = (f.ppg / prices[0].ppg * 100).toFixed(0);
     const ahorro = (100 - relativo).toFixed(0);
-    const margenPeso = f.precioVenta - f.costoTotal;
+    const margenPeso = f.precioNeto - f.costoTotal;
     const margenPct  = Math.round(f.margen * 100);
     const mColor = margenPct >= 30 ? 'var(--teal)' : margenPct >= 15 ? 'var(--amber)' : 'var(--red)';
     html += `<tr>
       <td style="font-weight:500">${f.name}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.g >= 1000 ? (f.g/1000)+' kg' : f.g+' g'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);font-weight:500">${fmtClp(f.precioVenta)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);font-weight:500">${fmtClp(f.precioVenta)} <span style="font-size:10px;color:var(--text3)">c/IVA</span></td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)">${fmtClp(f.costoTotal)}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${colors[i]}">${f.ppg < 10 ? '$'+f.ppg.toFixed(1) : '$'+Math.round(f.ppg)}/g</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:${mColor};font-weight:500">${margenPct}%</td>
