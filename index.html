@@ -458,6 +458,26 @@
   .cbar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-family: 'DM Mono', monospace; font-size: 10px; transition: width 0.5s ease; white-space: nowrap; overflow: hidden; }
   .cbar-val { font-family: 'DM Mono', monospace; font-size: 11px; min-width: 64px; }
 
+  /* Simple tab */
+  .s-gram-btn, .s-mgn-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg3);
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .s-gram-btn:hover, .s-mgn-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,0.06); }
+  .s-gram-btn.active, .s-mgn-btn.active { border-color: var(--accent); color: var(--bg); background: var(--accent); }
+  #s-costo::-webkit-inner-spin-button,
+  #s-costo::-webkit-outer-spin-button,
+  #s-gramos::-webkit-inner-spin-button,
+  #s-gramos::-webkit-outer-spin-button { -webkit-appearance: none; }
+
   /* Footer */
   .footer {
     margin-top: 48px;
@@ -504,6 +524,9 @@
     </button>
     <button class="tab-btn" onclick="showTab('competencia')" role="tab">
       <span class="tab-dot"></span>vs Competencia
+    </button>
+    <button class="tab-btn" onclick="showTab('simple')" role="tab" style="border:1px solid rgba(200,240,96,0.3);color:var(--accent)">
+      <span class="tab-dot" style="background:var(--accent)"></span>Precio rápido
     </button>
   </div>
 
@@ -806,6 +829,112 @@
     <div id="comp-bars-wrap" style="margin-top:24px"></div>
   </div>
 
+  <!-- TAB 6: Precio Rápido -->
+  <div id="tab-simple" class="tab-panel">
+
+    <div style="max-width:480px;margin:0 auto;padding-top:8px">
+
+      <!-- Title -->
+      <div style="text-align:center;margin-bottom:36px">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Calculadora rápida</div>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;letter-spacing:-0.01em">¿Cuánto cobro por<br><em style="color:var(--accent)">este producto?</em></h2>
+        <p style="font-size:13px;color:var(--text2);margin-top:10px">Ingresá 3 datos y te digo el precio</p>
+      </div>
+
+      <!-- Step 1 -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">¿Cuánto pagaste por kg?</div>
+            <div style="font-size:12px;color:var(--text3)">Precio neto sin IVA del proveedor</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:22px;color:var(--text3)">$</span>
+          <input type="number" id="s-costo" placeholder="8.000" min="0" step="100"
+            style="background:transparent;border:none;border-bottom:2px solid var(--accent);outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:32px;font-weight:500;width:100%;padding-bottom:4px;-moz-appearance:textfield"
+            oninput="calcSimple()">
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text3)">/kg</span>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">¿Cuántos gramos vas a vender?</div>
+            <div style="font-size:12px;color:var(--text3)">O elige un formato común</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          <button class="s-gram-btn" onclick="setGram(50)"   data-g="50">50 g</button>
+          <button class="s-gram-btn" onclick="setGram(100)"  data-g="100">100 g</button>
+          <button class="s-gram-btn" onclick="setGram(200)"  data-g="200">200 g</button>
+          <button class="s-gram-btn" onclick="setGram(500)"  data-g="500">500 g</button>
+          <button class="s-gram-btn" onclick="setGram(1000)" data-g="1000">1 kg</button>
+          <button class="s-gram-btn" onclick="setGram(3000)" data-g="3000">3 kg</button>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <input type="number" id="s-gramos" placeholder="500" min="1" step="50"
+            style="background:transparent;border:none;border-bottom:2px solid var(--accent);outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:32px;font-weight:500;width:100%;padding-bottom:4px;-moz-appearance:textfield"
+            oninput="clearGramBtns(); calcSimple()">
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text3)">g</span>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">¿Qué ganancia querés?</div>
+            <div style="font-size:12px;color:var(--text3)">Margen sobre precio neto de venta</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          <button class="s-mgn-btn" onclick="setMgn(25)" data-m="25">25%</button>
+          <button class="s-mgn-btn active" onclick="setMgn(35)" data-m="35">35%</button>
+          <button class="s-mgn-btn" onclick="setMgn(45)" data-m="45">45%</button>
+          <button class="s-mgn-btn" onclick="setMgn(55)" data-m="55">55%</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="range" id="s-mgn" min="10" max="70" value="35" step="1"
+            oninput="clearMgnBtns(); document.getElementById('s-mgn-num').textContent=this.value+'%'; calcSimple()">
+          <span id="s-mgn-num" style="font-family:'DM Mono',monospace;font-size:18px;color:var(--accent);min-width:42px">35%</span>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="s-result" style="display:none;background:linear-gradient(135deg,rgba(200,240,96,0.08),rgba(200,240,96,0.03));border:1px solid rgba(200,240,96,0.25);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Precio de venta al público</div>
+        <div id="s-precio-final" style="font-family:'DM Serif Display',serif;font-size:52px;color:var(--accent);letter-spacing:-0.02em;line-height:1"></div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">IVA incluido (19%)</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Tu costo</div>
+            <div id="s-costo-total" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--text2)"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Ganancia</div>
+            <div id="s-ganancia" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--teal)"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Precio/g</div>
+            <div id="s-ppg" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--accent)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="s-placeholder" style="background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--radius);padding:32px;text-align:center;color:var(--text3);font-size:13px">
+        Completá los 3 pasos para ver el precio 👆
+      </div>
+
+    </div>
+  </div>
+
   <footer class="footer">
     <p>Datos basados en mercado de frutos secos Chile · Precios en CLP</p>
     <span class="footer-logo">v1.0</span>
@@ -990,7 +1119,7 @@ function buildPyramid(prices) {
 }
 
 // ── Tab switching ──
-const TAB_NAMES = ['gramajes','descuentos','calculadora','piramide','competencia'];
+const TAB_NAMES = ['gramajes','descuentos','calculadora','piramide','competencia','simple'];
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1123,6 +1252,56 @@ function recalcComp() {
   });
   barsHtml += '</div>';
   document.getElementById('comp-bars-wrap').innerHTML = barsHtml;
+}
+
+// ── Simple calculator ──
+function setGram(g) {
+  document.getElementById('s-gramos').value = g;
+  document.querySelectorAll('.s-gram-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.g) === g));
+  calcSimple();
+}
+function clearGramBtns() {
+  document.querySelectorAll('.s-gram-btn').forEach(b => b.classList.remove('active'));
+}
+function setMgn(m) {
+  document.getElementById('s-mgn').value = m;
+  document.getElementById('s-mgn-num').textContent = m + '%';
+  document.querySelectorAll('.s-mgn-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.m) === m));
+  calcSimple();
+}
+function clearMgnBtns() {
+  document.querySelectorAll('.s-mgn-btn').forEach(b => b.classList.remove('active'));
+}
+function calcSimple() {
+  const costo  = parseFloat(document.getElementById('s-costo').value);
+  const gramos = parseFloat(document.getElementById('s-gramos').value);
+  const mgn    = parseFloat(document.getElementById('s-mgn').value) / 100;
+
+  const result      = document.getElementById('s-result');
+  const placeholder = document.getElementById('s-placeholder');
+
+  if (!costo || !gramos || !mgn) {
+    result.style.display = 'none';
+    placeholder.style.display = 'block';
+    return;
+  }
+
+  const EMB     = 250; // embalaje estándar fijo
+  const IVA     = 1.19;
+  const costoPg = costo / 1000;
+  const costoTotal  = costoPg * gramos + EMB;
+  const precioNeto  = costoTotal / (1 - mgn);
+  const precioFinal = precioNeto * IVA;
+  const ganancia    = precioNeto - costoTotal;
+  const ppg         = precioFinal / gramos;
+
+  document.getElementById('s-precio-final').textContent  = fmtClp(precioFinal);
+  document.getElementById('s-costo-total').textContent   = fmtClp(costoTotal);
+  document.getElementById('s-ganancia').textContent      = fmtClp(ganancia);
+  document.getElementById('s-ppg').textContent           = (ppg < 10 ? '$'+ppg.toFixed(1) : '$'+Math.round(ppg)) + '/g';
+
+  result.style.display      = 'block';
+  placeholder.style.display = 'none';
 }
 
 // ── Init ──
