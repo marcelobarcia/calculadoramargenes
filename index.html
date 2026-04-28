@@ -478,6 +478,22 @@
   #s-gramos::-webkit-inner-spin-button,
   #s-gramos::-webkit-outer-spin-button { -webkit-appearance: none; }
 
+  .u-prod-btn, .u-qty-btn, .u-mgn-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg3);
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .u-prod-btn:hover, .u-qty-btn:hover, .u-mgn-btn:hover { border-color: var(--blue); color: var(--blue); background: rgba(96,168,240,0.06); }
+  .u-prod-btn.active { border-color: var(--blue); color: var(--bg); background: var(--blue); }
+  .u-qty-btn.active, .u-mgn-btn.active { border-color: var(--blue); color: var(--bg); background: var(--blue); }
+
   /* Footer */
   .footer {
     margin-top: 48px;
@@ -527,6 +543,9 @@
     </button>
     <button class="tab-btn" onclick="showTab('simple')" role="tab" style="border:1px solid rgba(200,240,96,0.3);color:var(--accent)">
       <span class="tab-dot" style="background:var(--accent)"></span>Precio rápido
+    </button>
+    <button class="tab-btn" onclick="showTab('unidad')" role="tab" style="border:1px solid rgba(96,168,240,0.3);color:var(--blue)">
+      <span class="tab-dot" style="background:var(--blue)"></span>Por unidad
     </button>
   </div>
 
@@ -935,6 +954,156 @@
     </div>
   </div>
 
+  <!-- TAB 7: Por Unidad -->
+  <div id="tab-unidad" class="tab-panel">
+    <div style="max-width:480px;margin:0 auto;padding-top:8px">
+
+      <div style="text-align:center;margin-bottom:36px">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Calculadora por unidad</div>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;letter-spacing:-0.01em">Aceite, huevos,<br><em style="color:var(--blue)">lo que sea</em></h2>
+        <p style="font-size:13px;color:var(--text2);margin-top:10px">Sin peso — calculás por unidad o envase</p>
+      </div>
+
+      <!-- Nombre producto -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">✦</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">Producto</div>
+            <div style="font-size:12px;color:var(--text3)">Opcional, para referencia</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <button class="u-prod-btn" onclick="setProd('🫙 Aceite')"  data-p="aceite">🫙 Aceite</button>
+          <button class="u-prod-btn" onclick="setProd('🥚 Huevos')"  data-p="huevos">🥚 Huevos</button>
+          <button class="u-prod-btn" onclick="setProd('🍯 Miel')"    data-p="miel">🍯 Miel</button>
+          <button class="u-prod-btn" onclick="setProd('🥛 Leche')"   data-p="leche">🥛 Leche</button>
+          <button class="u-prod-btn" onclick="setProd('🧴 Vinagre')" data-p="vinagre">🧴 Vinagre</button>
+          <button class="u-prod-btn" onclick="setProd('📦 Otro')"    data-p="otro">📦 Otro</button>
+        </div>
+        <input type="text" id="u-nombre" placeholder="ej: Aceite de oliva 500ml"
+          style="background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);font-family:'Geist',sans-serif;font-size:16px;width:100%;padding-bottom:6px;transition:border-color 0.2s"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+      </div>
+
+      <!-- Paso 1: costo -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">¿Cuánto te cuesta cada unidad?</div>
+            <div style="font-size:12px;color:var(--text3)">Precio neto sin IVA que pagás al proveedor</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:22px;color:var(--text3)">$</span>
+          <input type="number" id="u-costo" placeholder="2.500" min="0" step="50"
+            style="background:transparent;border:none;border-bottom:2px solid var(--blue);outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:32px;font-weight:500;width:100%;padding-bottom:4px;-moz-appearance:textfield"
+            oninput="calcUnidad()">
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text3)">/unidad</span>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px">O ingresá el precio del pack y cuántas unidades trae:</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Precio pack</div>
+              <div style="display:flex;align-items:baseline;gap:4px">
+                <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text3)">$</span>
+                <input type="number" id="u-pack-precio" placeholder="15.000" min="0" step="100"
+                  style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;width:100%;padding:6px 8px;-moz-appearance:textfield"
+                  oninput="calcDesdepack()">
+              </div>
+            </div>
+            <span style="color:var(--text3);font-size:18px;padding-top:14px">÷</span>
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Unidades</div>
+              <input type="number" id="u-pack-uds" placeholder="6" min="1" step="1"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;width:100%;padding:6px 8px;-moz-appearance:textfield"
+                oninput="calcDesdepack()">
+            </div>
+            <span style="color:var(--text3);font-size:18px;padding-top:14px">=</span>
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Costo/und.</div>
+              <div id="u-pack-result" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);padding:6px 0">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 2: cuántas unidades vendés -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">¿Cuántas unidades vendés juntas?</div>
+            <div style="font-size:12px;color:var(--text3)">Si vendés de a 1, dejá en 1</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <button class="u-qty-btn active" onclick="setQty(1)"  data-q="1">1 und.</button>
+          <button class="u-qty-btn" onclick="setQty(6)"  data-q="6">6 und.</button>
+          <button class="u-qty-btn" onclick="setQty(12)" data-q="12">12 und.</button>
+          <button class="u-qty-btn" onclick="setQty(24)" data-q="24">24 und.</button>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <input type="number" id="u-qty" value="1" min="1" step="1"
+            style="background:transparent;border:none;border-bottom:2px solid var(--blue);outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:32px;font-weight:500;width:100%;padding-bottom:4px;-moz-appearance:textfield"
+            oninput="clearQtyBtns(); calcUnidad()">
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text3)">unidades</span>
+        </div>
+      </div>
+
+      <!-- Paso 3: margen -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+          <div>
+            <div style="font-weight:500;font-size:14px">¿Qué ganancia querés?</div>
+            <div style="font-size:12px;color:var(--text3)">Margen sobre precio neto de venta</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          <button class="u-mgn-btn" onclick="setUMgn(20)" data-m="20">20%</button>
+          <button class="u-mgn-btn active" onclick="setUMgn(35)" data-m="35">35%</button>
+          <button class="u-mgn-btn" onclick="setUMgn(45)" data-m="45">45%</button>
+          <button class="u-mgn-btn" onclick="setUMgn(60)" data-m="60">60%</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="range" id="u-mgn" min="5" max="80" value="35" step="1"
+            oninput="clearUMgnBtns(); document.getElementById('u-mgn-num').textContent=this.value+'%'; calcUnidad()">
+          <span id="u-mgn-num" style="font-family:'DM Mono',monospace;font-size:18px;color:var(--blue);min-width:42px">35%</span>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="u-result" style="display:none;background:linear-gradient(135deg,rgba(96,168,240,0.08),rgba(96,168,240,0.03));border:1px solid rgba(96,168,240,0.25);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:16px">
+        <div id="u-prod-label" style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Precio de venta al público</div>
+        <div id="u-precio-final" style="font-family:'DM Serif Display',serif;font-size:52px;color:var(--blue);letter-spacing:-0.02em;line-height:1"></div>
+        <div id="u-qty-label" style="font-size:12px;color:var(--text3);margin-top:4px">IVA incluido (19%)</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Tu costo</div>
+            <div id="u-costo-total" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--text2)"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Ganancia</div>
+            <div id="u-ganancia" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--teal)"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">Precio/unidad</div>
+            <div id="u-ppunit" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--blue)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="u-placeholder" style="background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--radius);padding:32px;text-align:center;color:var(--text3);font-size:13px">
+        Completá los pasos para ver el precio 👆
+      </div>
+
+    </div>
+  </div>
+
   <footer class="footer">
     <p>Datos basados en mercado de frutos secos Chile · Precios en CLP</p>
     <span class="footer-logo">v1.0</span>
@@ -1119,7 +1288,7 @@ function buildPyramid(prices) {
 }
 
 // ── Tab switching ──
-const TAB_NAMES = ['gramajes','descuentos','calculadora','piramide','competencia','simple'];
+const TAB_NAMES = ['gramajes','descuentos','calculadora','piramide','competencia','simple','unidad'];
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1299,6 +1468,74 @@ function calcSimple() {
   document.getElementById('s-costo-total').textContent   = fmtClp(costoTotal);
   document.getElementById('s-ganancia').textContent      = fmtClp(ganancia);
   document.getElementById('s-ppg').textContent           = (ppg < 10 ? '$'+ppg.toFixed(1) : '$'+Math.round(ppg)) + '/g';
+
+  result.style.display      = 'block';
+  placeholder.style.display = 'none';
+}
+
+// ── Unidad calculator ──
+function setProd(label) {
+  document.getElementById('u-nombre').value = label;
+  document.querySelectorAll('.u-prod-btn').forEach(b => b.classList.toggle('active', b.textContent === label));
+}
+function setQty(q) {
+  document.getElementById('u-qty').value = q;
+  document.querySelectorAll('.u-qty-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.q) === q));
+  calcUnidad();
+}
+function clearQtyBtns() {
+  document.querySelectorAll('.u-qty-btn').forEach(b => b.classList.remove('active'));
+}
+function setUMgn(m) {
+  document.getElementById('u-mgn').value = m;
+  document.getElementById('u-mgn-num').textContent = m + '%';
+  document.querySelectorAll('.u-mgn-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.m) === m));
+  calcUnidad();
+}
+function clearUMgnBtns() {
+  document.querySelectorAll('.u-mgn-btn').forEach(b => b.classList.remove('active'));
+}
+function calcDesdepack() {
+  const precio = parseFloat(document.getElementById('u-pack-precio').value);
+  const uds    = parseFloat(document.getElementById('u-pack-uds').value);
+  const el     = document.getElementById('u-pack-result');
+  if (precio && uds && uds > 0) {
+    const costoUnd = precio / uds;
+    el.textContent = fmtClp(costoUnd);
+    document.getElementById('u-costo').value = Math.round(costoUnd);
+    calcUnidad();
+  } else {
+    el.textContent = '—';
+  }
+}
+function calcUnidad() {
+  const costoUnd = parseFloat(document.getElementById('u-costo').value);
+  const qty      = parseFloat(document.getElementById('u-qty').value) || 1;
+  const mgn      = parseFloat(document.getElementById('u-mgn').value) / 100;
+  const nombre   = document.getElementById('u-nombre').value.trim();
+
+  const result      = document.getElementById('u-result');
+  const placeholder = document.getElementById('u-placeholder');
+
+  if (!costoUnd || !mgn) {
+    result.style.display = 'none';
+    placeholder.style.display = 'block';
+    return;
+  }
+
+  const IVA         = 1.19;
+  const costoTotal  = costoUnd * qty;
+  const precioNeto  = costoTotal / (1 - mgn);
+  const precioFinal = precioNeto * IVA;
+  const ganancia    = precioNeto - costoTotal;
+  const ppUnit      = precioFinal / qty;
+
+  document.getElementById('u-precio-final').textContent = fmtClp(precioFinal);
+  document.getElementById('u-costo-total').textContent  = fmtClp(costoTotal);
+  document.getElementById('u-ganancia').textContent     = fmtClp(ganancia);
+  document.getElementById('u-ppunit').textContent       = fmtClp(ppUnit) + (qty > 1 ? '/und.' : '');
+  document.getElementById('u-prod-label').textContent   = nombre ? nombre.toUpperCase() : 'PRECIO DE VENTA AL PÚBLICO';
+  document.getElementById('u-qty-label').textContent    = qty > 1 ? `Pack de ${qty} unidades · IVA incluido (19%)` : 'IVA incluido (19%)';
 
   result.style.display      = 'block';
   placeholder.style.display = 'none';
